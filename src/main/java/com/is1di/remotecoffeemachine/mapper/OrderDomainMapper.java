@@ -1,6 +1,6 @@
 package com.is1di.remotecoffeemachine.mapper;
 
-import com.is1di.remotecoffeemachine.model.domain.CoffeeDefault;
+import com.is1di.remotecoffeemachine.model.domain.CoffeeDomain;
 import com.is1di.remotecoffeemachine.model.domain.OrderDomain;
 import com.is1di.remotecoffeemachine.model.entity.OrderEntity;
 import com.is1di.remotecoffeemachine.service.CoffeeService;
@@ -19,7 +19,7 @@ public abstract class OrderDomainMapper {
     public abstract OrderEntity toEntity(OrderDomain order);
 
     @Named("getCoffee")
-    public CoffeeDefault getCoffee(String name) {
+    public CoffeeDomain getCoffee(String name) {
         return coffeeService.getByName(name);
     }
 

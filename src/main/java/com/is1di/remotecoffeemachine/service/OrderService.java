@@ -7,12 +7,16 @@ import com.is1di.remotecoffeemachine.mapper.OrderDomainMapper;
 import com.is1di.remotecoffeemachine.message.MessageBase;
 import com.is1di.remotecoffeemachine.model.domain.OrderDomain;
 import com.is1di.remotecoffeemachine.repository.OrderRepository;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -32,14 +36,15 @@ public class OrderService {
     private final TaskScheduler taskScheduler;
     private final CoffeeService coffeeService;
     private final OrderDomainMapper orderDomainMapper;
-    private final HashMap<UUID, ScheduledFuture<?>> schedulesMap = new HashMap<>();
+    private final HashMap<UUID, Pair<SseEmitter,ScheduledFuture<?>>> schedulesMap = new HashMap<>();
 
     public void scheduleOrder(OrderDomain order) {
-        schedulesMap.put(order.getId(), taskScheduler.schedule(createTask(order), ZonedDateTime.of(nextAvailableOrderTime(), ZoneId.systemDefault()).toInstant()));
+        SseEmitter emitter;
+        schedulesMap.put(order.getId(), new Pair<>(emitter = new SseEmitter(currentDurationOfCoffee().toSeconds()), taskScheduler.schedule(createTask(order, emitter), ZonedDateTime.of(nextAvailableOrderTime(), ZoneId.systemDefault()).toInstant())));
     }
 
-    public Runnable createTask(OrderDomain order) {
-        return new OrderTask(coffeeMachineService, order, this);
+    public Runnable createTask(OrderDomain order, SseEmitter emitter) {
+        return new OrderTask(coffeeMachineService, order, this, emitter);
 
     }
 
@@ -93,5 +98,21 @@ public class OrderService {
 
     public <DTO> OrderDomain update(UUID id, DTO order, BiFunction<OrderDomain, DTO, OrderDomain> mapper) {
         return orderDomainMapper.toDomain(orderRepository.save(orderDomainMapper.toEntity(mapper.apply(getById(id), order))));
+    }
+
+    public SseEmitter streamById(UUID id) {
+        return schedulesMap.get(id).getValue1();
+    }
+
+    public boolean closeOrder(UUID id) {
+        return schedulesMap.get(id).value2.cancel(false);
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class Pair<A,B> {
+        private A value1;
+        private B value2;
     }
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class IngredientDefault implements Ingredient {
+public class IngredientDomain implements Ingredient {
     private UnitConverter.Unit unit;
     private Double amount;
     private String ingredient;

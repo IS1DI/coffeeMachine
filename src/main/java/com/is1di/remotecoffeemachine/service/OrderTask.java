@@ -2,11 +2,13 @@ package com.is1di.remotecoffeemachine.service;
 
 import com.is1di.remotecoffeemachine.exception.CoffeeMachineIsNotReadyException;
 import com.is1di.remotecoffeemachine.message.MessageBase;
-import com.is1di.remotecoffeemachine.model.domain.CoffeeStatusDefault;
+import com.is1di.remotecoffeemachine.model.domain.CoffeeStatusDomain;
 import com.is1di.remotecoffeemachine.model.domain.OrderDomain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -16,6 +18,7 @@ public class OrderTask extends Thread {
     private final CoffeeMachineService coffeeMachineService;
     private final OrderDomain order;
     private final OrderService orderService;
+    private final SseEmitter emitter;
 
     @Override
     public void run() {
@@ -27,14 +30,20 @@ public class OrderTask extends Thread {
                 order.setStartTimestamp(startTime = LocalDateTime.now());
                 Thread makingCoffeeThread = new Thread(() -> coffeeMachineService.makeCoffee(order.getCoffee()));
                 makingCoffeeThread.start();
-                for (CoffeeStatusDefault status : order.getCoffee().getStatuses()) {
+                for (CoffeeStatusDomain status : order.getCoffee().getStatuses()) {
                     try {
                         log.debug("status - {}, next starts after {}", status.getStatus(), status.getDuration());
                         order.setStatus(status);
                         orderService.update(order.getId(), order, (o1, o2) -> o2);
+                        emitter.send(SseEmitter.event()
+                                .data(order)
+                                .id(status.getStatus())
+                                .build());
                         Thread.sleep(status.getDuration().toMillis());
                     } catch (InterruptedException e) {
                         log.error("exception while sleeping in status {} order - {}", status.getStatus(), status.getOrder());
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -43,8 +52,13 @@ public class OrderTask extends Thread {
                         order.setCloseTimestamp(LocalDateTime.now());
                         orderService.update(order.getId(), order, (o1, o2) -> o2);
                         log.debug("order {} closed successfully time spend = {}", order.getId(), Duration.between(startTime, LocalDateTime.now()));
+                        emitter.send(SseEmitter.event()
+                                .data("ORDER " + order.getId() + " successfully created")
+                                .build());
                         this.join();
                     } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }

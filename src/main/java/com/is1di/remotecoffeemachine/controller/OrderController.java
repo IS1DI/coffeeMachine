@@ -6,6 +6,7 @@ import com.is1di.remotecoffeemachine.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
 
@@ -37,6 +38,11 @@ public class OrderController {
         return orderMapper.toOutput(orderService.currentOrder());
     }
 
+    @GetMapping("{id}/stream")
+    public SseEmitter streamStatusOfOrder(@PathVariable UUID id) {
+        return orderService.streamById(id);
+
+    }
 /*    @PutMapping("{id}")
     public OrderDto.Output update(@PathVariable UUID id, @RequestBody OrderDto.Update orderDto) {
         return orderMapper.toOutput(orderService.update(id, orderDto, orderMapper::toUpdate));

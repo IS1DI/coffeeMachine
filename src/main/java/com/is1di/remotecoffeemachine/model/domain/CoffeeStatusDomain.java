@@ -11,10 +11,10 @@ import java.time.Duration;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class CoffeeStatusDefault extends StatusImpl implements CoffeeStatus {
+public class CoffeeStatusDomain extends StatusImpl implements CoffeeStatus {
     private Duration duration;
 
-    public CoffeeStatusDefault(String status, Integer order, Duration duration) {
+    public CoffeeStatusDomain(String status, Integer order, Duration duration) {
         super(status, order);
         this.duration = duration;
     }

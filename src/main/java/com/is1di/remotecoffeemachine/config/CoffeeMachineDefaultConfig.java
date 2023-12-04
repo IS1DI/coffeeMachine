@@ -31,15 +31,15 @@ public class CoffeeMachineDefaultConfig {
                 List.of(new CoffeeMachineStatusDefault("ON", 0),
                         new CoffeeMachineStatusDefault("WORKING", 1),
                         new CoffeeMachineStatusDefault("OFF", 2)),
-                List.of(new CoffeeDefault(
+                List.of(new CoffeeDomain(
                         "Капучино",
-                        List.of(new IngredientDefault(UnitConverter.Unit.MILLILITRE, 100d, "milk"),
-                                new IngredientDefault(UnitConverter.Unit.GRAM, 300d, "coffee"),
-                                new IngredientDefault(UnitConverter.Unit.MILLILITRE, 300d, "water")),
-                        List.of(new CoffeeStatusDefault("start", 0, Duration.ofSeconds(15)),
-                                new CoffeeStatusDefault("adding coffee", 1, Duration.ofSeconds(20)),
-                                new CoffeeStatusDefault("adding milk", 2, Duration.ofSeconds(30)),
-                                new CoffeeStatusDefault("adding water", 3, Duration.ofSeconds(50)))))
+                        List.of(new IngredientDomain(UnitConverter.Unit.MILLILITRE, 100d, "milk"),
+                                new IngredientDomain(UnitConverter.Unit.GRAM, 300d, "coffee"),
+                                new IngredientDomain(UnitConverter.Unit.MILLILITRE, 300d, "water")),
+                        List.of(new CoffeeStatusDomain("start", 0, Duration.ofSeconds(15)),
+                                new CoffeeStatusDomain("adding coffee", 1, Duration.ofSeconds(20)),
+                                new CoffeeStatusDomain("adding milk", 2, Duration.ofSeconds(30)),
+                                new CoffeeStatusDomain("adding water", 3, Duration.ofSeconds(50)))))
         );
     }
 

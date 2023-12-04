@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CoffeeDefault implements Coffee {
+public class CoffeeDomain implements Coffee {
     private String name;
-    private List<IngredientDefault> ingredients;
-    private List<CoffeeStatusDefault> statuses;
+    private List<IngredientDomain> ingredients;
+    private List<CoffeeStatusDomain> statuses;
 }

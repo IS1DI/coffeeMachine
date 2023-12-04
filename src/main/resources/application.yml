@@ -13,9 +13,10 @@ spring:
             ddl-auto: create-drop
 
 
-
 server:
     port: ${PORT:80}
 logging:
     level:
         com.is1di.remotecoffeemachine: trace
+
+

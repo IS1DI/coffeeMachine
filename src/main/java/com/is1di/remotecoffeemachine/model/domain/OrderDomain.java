@@ -13,6 +13,6 @@ public class OrderDomain {
     private LocalDateTime creationTimestamp;
     private LocalDateTime startTimestamp;
     private LocalDateTime closeTimestamp;
-    private CoffeeStatusDefault status;
-    private CoffeeDefault coffee;
+    private CoffeeStatusDomain status;
+    private CoffeeDomain coffee;
 }
