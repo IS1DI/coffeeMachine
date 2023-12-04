@@ -42,7 +42,7 @@ public interface CoffeeMachineService {
     long ordersLimit();
 
     /**
-     * @return true - coffeeMachine is turnedOn & false - else
+     * @return true - coffeeMachine is turnedOn, false otherwise
      */
     boolean isEnabled();
 

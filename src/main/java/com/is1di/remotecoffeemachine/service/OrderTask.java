@@ -11,6 +11,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -28,7 +31,8 @@ public class OrderTask extends Thread {
                 LocalDateTime startTime;
                 log.debug("machine is ready and task started for order {}", order.getId());
                 order.setStartTimestamp(startTime = LocalDateTime.now());
-                Thread makingCoffeeThread = new Thread(() -> coffeeMachineService.makeCoffee(order.getCoffee()));
+                ExecutorService execService = Executors.newCachedThreadPool();
+                Thread makingCoffeeThread = new Thread(() -> coffeeMachineService.makeCoffee(order.getCoffee().toBuilder().build()));
                 makingCoffeeThread.start();
                 for (CoffeeStatusDomain status : order.getCoffee().getStatuses()) {
                     try {
@@ -36,8 +40,8 @@ public class OrderTask extends Thread {
                         order.setStatus(status);
                         orderService.update(order.getId(), order, (o1, o2) -> o2);
                         emitter.send(SseEmitter.event()
-                                .data(order)
-                                .id(status.getStatus())
+                                .data(status.getStatus())
+                                .id(order.getId().toString())
                                 .build());
                         Thread.sleep(status.getDuration().toMillis());
                     } catch (InterruptedException e) {
@@ -52,21 +56,21 @@ public class OrderTask extends Thread {
                         order.setCloseTimestamp(LocalDateTime.now());
                         orderService.update(order.getId(), order, (o1, o2) -> o2);
                         log.debug("order {} closed successfully time spend = {}", order.getId(), Duration.between(startTime, LocalDateTime.now()));
+                        makingCoffeeThread.join();
                         emitter.send(SseEmitter.event()
-                                .data("ORDER " + order.getId() + " successfully created")
+                                .data(order.getCoffee().getName() + " created")
+                                .id(order.getId().toString())
                                 .build());
-                        this.join();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
+                        emitter.complete();
+                    } catch (IOException | InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 }
             } else {
                 log.error("machine is not ready");
-                throw new CoffeeMachineIsNotReadyException(
+                emitter.completeWithError(new CoffeeMachineIsNotReadyException(
                         new MessageBase(MessageBase.MessageMethod.MACHINE_IS_NOT_READY)
-                );
+                ));
             }
         }
     }

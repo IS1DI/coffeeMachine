@@ -8,9 +8,11 @@ public record MessageBase(Message method, Object... args) {
     public enum MessageMethod implements Message {
         COFFEE_NOT_FOUND("coffee.error.notFound"),
         ORDER_NOT_FOUND("order.error.notFound"),
+        ORDER_NOT_STARTED("order.error.notStarted"),
         ORDER_LIMIT_OUT_OF_BOUNDS("order.limit.error.outOfBounds"),
         MACHINE_IS_NOT_ENABLED("machine.error.isNotEnabled"),
-        MACHINE_IS_NOT_READY("machine.error.notReady");
+        MACHINE_IS_NOT_READY("machine.error.notReady"),
+        ORDER_ERROR_MAKING_COFFEE("order.error.makingCoffee"), ORDER_CANNOT_CLOSE("order.error.close");
 
         private final String message;
 

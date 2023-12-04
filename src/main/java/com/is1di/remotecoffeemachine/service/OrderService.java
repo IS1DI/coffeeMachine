@@ -1,8 +1,6 @@
 package com.is1di.remotecoffeemachine.service;
 
-import com.is1di.remotecoffeemachine.exception.CoffeeMachineIsNotEnabledException;
-import com.is1di.remotecoffeemachine.exception.LimitOutOfBoundsException;
-import com.is1di.remotecoffeemachine.exception.NotFoundException;
+import com.is1di.remotecoffeemachine.exception.*;
 import com.is1di.remotecoffeemachine.mapper.OrderDomainMapper;
 import com.is1di.remotecoffeemachine.message.MessageBase;
 import com.is1di.remotecoffeemachine.model.domain.OrderDomain;
@@ -18,13 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
 @Service
@@ -36,16 +33,33 @@ public class OrderService {
     private final TaskScheduler taskScheduler;
     private final CoffeeService coffeeService;
     private final OrderDomainMapper orderDomainMapper;
-    private final HashMap<UUID, Pair<SseEmitter,ScheduledFuture<?>>> schedulesMap = new HashMap<>();
+    private final HashMap<UUID, Pair<SseEmitter, ScheduledFuture<?>>> schedulesMap = new HashMap<>();
 
     public void scheduleOrder(OrderDomain order) {
         SseEmitter emitter;
-        schedulesMap.put(order.getId(), new Pair<>(emitter = new SseEmitter(currentDurationOfCoffee().toSeconds()), taskScheduler.schedule(createTask(order, emitter), ZonedDateTime.of(nextAvailableOrderTime(), ZoneId.systemDefault()).toInstant())));
+        Instant delay = ZonedDateTime.of(nextAvailableOrderTime(),
+                ZoneId.systemDefault()).toInstant();
+        schedulesMap.put(order.getId(),
+                new Pair<>(emitter = new SseEmitter(0L),
+                        taskScheduler.schedule(createTask(order, emitter), delay)
+                ));
     }
 
-    public Runnable createTask(OrderDomain order, SseEmitter emitter) {
-        return new OrderTask(coffeeMachineService, order, this, emitter);
+    public OrderTask createTask(OrderDomain order, SseEmitter emitter) {
+        emitter.onCompletion(() -> {
+            try {
+                schedulesMap.get(order.getId()).getValue2().wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            schedulesMap.remove(order.getId());
+        });
+        emitter.onError((throwable) -> {
+            schedulesMap.remove(order.getId());
+            throw new OrderException(new MessageBase(MessageBase.MessageMethod.ORDER_ERROR_MAKING_COFFEE, order.getCoffee().getName()));
 
+        });
+        return new OrderTask(coffeeMachineService, order, this, emitter);
     }
 
     public OrderDomain create(OrderDomain order) {
@@ -101,17 +115,30 @@ public class OrderService {
     }
 
     public SseEmitter streamById(UUID id) {
-        return schedulesMap.get(id).getValue1();
+        if (schedulesMap.containsKey(id)) {
+            long delay;
+            if ((delay = schedulesMap.get(id).getValue2().getDelay(TimeUnit.SECONDS)) <= 0)
+                return schedulesMap.get(id).getValue1();
+            else
+                throw new OrderNotStartedException(new MessageBase(MessageBase.MessageMethod.ORDER_NOT_STARTED, new Date(Instant.now().plusSeconds(delay).toEpochMilli())));
+        } else throw new NotFoundException(new MessageBase(MessageBase.MessageMethod.ORDER_NOT_FOUND));
     }
 
-    public boolean closeOrder(UUID id) {
-        return schedulesMap.get(id).value2.cancel(false);
+    public void delete(UUID id) {
+        OrderDomain order;
+        orderRepository.delete(orderDomainMapper.toEntity(order = getById(id)));
+        if(schedulesMap.get(id).value2.cancel(false)) {
+            schedulesMap.get(id).getValue1().complete();
+            schedulesMap.remove(id);
+        } else {
+            throw new OrderCannotCloseException(new MessageBase(MessageBase.MessageMethod.ORDER_CANNOT_CLOSE, id, order.getCoffee().getName()));
+        }
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    private static class Pair<A,B> {
+    private static class Pair<A, B> {
         private A value1;
         private B value2;
     }

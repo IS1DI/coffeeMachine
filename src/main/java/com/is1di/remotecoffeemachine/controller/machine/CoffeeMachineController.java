@@ -13,18 +13,8 @@ public class CoffeeMachineController {
     private final CoffeeMachineService coffeeMachineService;
     private final CoffeeMachineMapper coffeeMachineMapper;
 
-    @PostMapping
-    public CoffeeMachineDto.CoffeeMachineStatusDto.Output turnOn() {
-        return coffeeMachineMapper.statusToOutput(coffeeMachineService.turnOn());
-    }
-
-    @DeleteMapping
-    public CoffeeMachineDto.CoffeeMachineStatusDto.Output turnOff() {
-        return coffeeMachineMapper.statusToOutput(coffeeMachineService.turnOff());
-    }
-
     @GetMapping
-    public CoffeeMachineDto.CoffeeMachineStatusDto.Output currentStatus() {
-        return coffeeMachineMapper.statusToOutput(coffeeMachineService.currentStatus());
+    public CoffeeMachineDto.Output info() {
+        return coffeeMachineMapper.toOutput(coffeeMachineService.info());
     }
 }

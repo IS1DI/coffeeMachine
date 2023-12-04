@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class OrderDomain {
     private UUID id;
     private LocalDateTime creationTimestamp;

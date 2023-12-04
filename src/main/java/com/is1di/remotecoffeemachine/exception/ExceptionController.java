@@ -41,4 +41,22 @@ public class ExceptionController {
     public ExceptionMessage notFound(OutOfIngredientException ex) {
         return new ExceptionMessage(messageService.getMessage(ex.getMessageBase()));
     }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(OrderNotStartedException.class)
+    public ExceptionMessage notFound(OrderNotStartedException ex) {
+        return new ExceptionMessage(messageService.getMessage(ex.getMessageBase()));
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(OrderException.class)
+    public ExceptionMessage notFound(OrderException ex) {
+        return new ExceptionMessage(messageService.getMessage(ex.getMessageBase()));
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(OrderCannotCloseException.class)
+    public ExceptionMessage notFound(OrderCannotCloseException ex) {
+        return new ExceptionMessage(messageService.getMessage(ex.getMessageBase()));
+    }
 }
