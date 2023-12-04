@@ -22,8 +22,8 @@
 ```
 Для запуска:
 ```shell
-docker-compose -f ./docker-compose.yml -e ./.env up -d
+docker-compose -f ./docker-compose.yml up -d
 ```
-
+[swagger url](http://localhost/swagger-ui/index.html)
 ***
 
