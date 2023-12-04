@@ -17,6 +17,9 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
+ext {
+    set('testcontainers.version', "1.19.3")
+}
 
 repositories {
     mavenCentral()
@@ -33,6 +36,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
 }
 
 tasks.named('test') {

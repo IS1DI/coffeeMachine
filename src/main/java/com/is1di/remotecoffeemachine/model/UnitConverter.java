@@ -1,4 +1,4 @@
-package com.is1di.remotecoffeemachine.config;
+package com.is1di.remotecoffeemachine.model;
 
 import com.is1di.remotecoffeemachine.exception.NotFoundException;
 import com.is1di.remotecoffeemachine.message.MessageBase;

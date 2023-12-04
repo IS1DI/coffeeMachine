@@ -1,6 +1,6 @@
 package com.is1di.remotecoffeemachine.mapper;
 
-import com.is1di.remotecoffeemachine.config.UnitConverter;
+import com.is1di.remotecoffeemachine.model.UnitConverter;
 import com.is1di.remotecoffeemachine.message.MessageBase;
 import com.is1di.remotecoffeemachine.model.dto.UnitDto;
 import com.is1di.remotecoffeemachine.service.MessageService;

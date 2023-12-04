@@ -65,4 +65,9 @@ public interface CoffeeMachineService {
      * @return list of all coffee's
      */
     Collection<? extends Coffee> allCoffee();
+
+    /**
+     * @return list of all coffee machine statuses
+     */
+    Collection<? extends CoffeeMachineStatus> statuses();
 }

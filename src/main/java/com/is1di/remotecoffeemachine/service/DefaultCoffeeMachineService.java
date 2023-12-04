@@ -85,4 +85,9 @@ public class DefaultCoffeeMachineService implements CoffeeMachineService {
     public Collection<? extends Coffee> allCoffee() {
         return coffeeMachine.getCoffees();
     }
+
+    @Override
+    public Collection<? extends CoffeeMachineStatus> statuses() {
+        return coffeeMachine.getStatuses();
+    }
 }

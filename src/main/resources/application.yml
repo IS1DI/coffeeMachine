@@ -11,8 +11,9 @@ spring:
     jpa:
         hibernate:
             ddl-auto: validate
-
-
+    sql:
+        init:
+            mode: always
 server:
     port: ${PORT:80}
 logging:

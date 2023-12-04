@@ -1,7 +1,5 @@
 package com.is1di.remotecoffeemachine.model;
 
-import com.is1di.remotecoffeemachine.config.UnitConverter;
-
 public interface Ingredient {
     UnitConverter.Unit getUnit();
 

@@ -1,27 +1,20 @@
 package com.is1di.remotecoffeemachine.config;
 
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.is1di.remotecoffeemachine.model.UnitConverter;
 import com.is1di.remotecoffeemachine.model.domain.*;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.core.annotation.Order;
 
 import java.time.Duration;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 @Configuration
 public class CoffeeMachineDefaultConfig {
-    private static final String dateFormat = "yyyy-MM-dd";
-    private static final String dateTimeFormat = "dd-MM-yyyy HH:mm:ss";
-
     @Bean
     @Scope("singleton")
+    @Order
     public CoffeeMachineDefault getCoffeeMachine() {
         return new CoffeeMachineDefault(Duration.ofSeconds(10),
                 new Orders(10L),
@@ -41,20 +34,5 @@ public class CoffeeMachineDefaultConfig {
                                 new CoffeeStatusDomain("adding milk", 2, Duration.ofSeconds(30)),
                                 new CoffeeStatusDomain("adding water", 3, Duration.ofSeconds(50)))))
         );
-    }
-
-    @Bean
-    @Scope("singleton")
-    public TaskScheduler taskScheduler() {
-        return new ConcurrentTaskScheduler(Executors.newSingleThreadScheduledExecutor());
-    }
-
-    @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
-        return builder -> {
-            builder.simpleDateFormat(dateTimeFormat);
-            builder.serializers(new LocalDateSerializer(DateTimeFormatter.ofPattern(dateFormat)));
-            builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(dateTimeFormat)));
-        };
     }
 }
