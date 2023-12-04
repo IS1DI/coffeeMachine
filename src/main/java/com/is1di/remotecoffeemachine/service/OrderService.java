@@ -127,7 +127,7 @@ public class OrderService {
     public void delete(UUID id) {
         OrderDomain order;
         orderRepository.delete(orderDomainMapper.toEntity(order = getById(id)));
-        if(schedulesMap.get(id).value2.cancel(false)) {
+        if (schedulesMap.get(id).value2.cancel(false)) {
             schedulesMap.get(id).getValue1().complete();
             schedulesMap.remove(id);
         } else {
