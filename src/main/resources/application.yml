@@ -1,1 +1,21 @@
+spring:
+    application:
+        name: remote-coffee-machine
+    datasource:
+        url: ${DATA_URL}
+        username: ${DATA_USER}
+        password: ${DATA_PASS}
+    threads:
+        virtual:
+            enabled: true
+    jpa:
+        hibernate:
+            ddl-auto: create-drop
 
+
+
+server:
+    port: ${PORT:80}
+logging:
+    level:
+        com.is1di.remotecoffeemachine: trace
