@@ -1,7 +1,7 @@
 version: '3.9'
 services:
     coffee-machine:
-        image: is1di/coffee-machine:1.0.0
+        image: is1di/coffee-machine:1.0.1
         container_name: coffee-machine
         depends_on:
             postgres:
@@ -19,7 +19,7 @@ services:
         image: postgres:latest
         restart: always
         ports:
-            - "5433:5432"
+            - "5434:5433"
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: postgres
@@ -29,10 +29,7 @@ services:
                 aliases:
                     - "postgres"
         volumes:
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-            -   type: bind
-                source: ./pgData
-                target: /var/lib/postgresql/data
+            - ./src/main/resources/init.sql:/docker-entrypoint-initdb.d/i.sql
         healthcheck:
             test: [ "CMD-SHELL", "pg_isready -U postgres" ]
             interval: 10s
