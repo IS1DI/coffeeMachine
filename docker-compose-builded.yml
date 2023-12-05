@@ -1,0 +1,44 @@
+version: '3.9'
+services:
+    coffee-machine:
+        image: is1di/coffee-machine:1.0.0
+        container_name: coffee-machine
+        depends_on:
+            postgres:
+                condition: service_healthy
+        ports:
+            - "80:80"
+        environment:
+            PORT: 80
+            DATA_URL: jdbc:postgresql://postgres/postgres
+            DATA_PASS: postgres
+            DATA_USER: postgres
+        networks:
+            - backend
+    postgres:
+        image: postgres:latest
+        restart: always
+        ports:
+            - "5433:5432"
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+        networks:
+            backend:
+                aliases:
+                    - "postgres"
+        volumes:
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+            -   type: bind
+                source: ./pgData
+                target: /var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+            interval: 10s
+            timeout: 5s
+            retries: 15
+            start_period: 15s
+networks:
+    backend:
+        driver: bridge

@@ -23,6 +23,11 @@
 ```shell
 docker-compose -f ./docker-compose.yml up -d
 ```
+Или
+Можно запустить docker compose с уже собранным образом
+```shell
+docker-compose -f ./docker-compose-builded.yml up -d
+```
 [swagger url](http://localhost/swagger-ui/index.html)
 ***
 
