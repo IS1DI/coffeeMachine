@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.is1di'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2'
 
 java {
     sourceCompatibility = '21'
@@ -42,6 +42,24 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.register('buildDocker', Exec) {
+    dependsOn build
+    workingDir "$projectDir"
+    commandLine 'docker', 'build', '--rm', '.', '-t', "${project.group.split("\\.").last()}/${project.name.toLowerCase()}:$project.version", "-f", "$projectDir/Dockerfile"
+}
+
+tasks.register('runDocker', Exec) {
+    dependsOn buildDocker
+    workingDir "$projectDir"
+    commandLine 'docker', 'run', "${project.group.split("\\.").last()}/${project.name.toLowerCase()}:$project.version"
+}
+
+tasks.register('pushDocker', Exec) {
+    dependsOn buildDocker
+    workingDir "$projectDir"
+    commandLine 'docker', 'push', "${project.group.split("\\.").last()}/${project.name.toLowerCase()}:$project.version"
 }
 
 hibernate {
